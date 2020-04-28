@@ -1,0 +1,5 @@
+package items;
+
+public enum Tier {
+    COMMON, UNCOMMON, RARE, EPIC, LEGENDARY, MYTHICAL, EVENT, EXOTIC, SUPERSTITIOUS
+}
