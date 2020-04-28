@@ -1,0 +1,11 @@
+main: me.Bright.main.Main
+version: 3.6
+name: CustomPlugin
+author: TheBrightnessMan
+description: A plugin customly made for Craft N Kill
+api-version: 1.15
+commands:
+  getitem:
+    usage: /<command> <item>
+  push:
+    usage: /<command> <target>
