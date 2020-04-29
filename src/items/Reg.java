@@ -1,26 +1,20 @@
 package items;
 
 import armorsets.AetherArmor;
-import dragonproject.AetherDragon;
+import command.Commands;
 import dragonproject.Fight;
 import me.Bright.main.Main;
 import me.Bright.main.Methods;
-import net.minecraft.server.v1_15_R1.World;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.block.data.type.EndPortalFrame;
-import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
@@ -36,26 +30,27 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
-public class Reg implements Listener {
+import static me.Bright.Util.main.Methods.*;
+
+public class Reg extends Methods implements Listener {
 
     public HashMap<Player, ItemStack[]> items = new HashMap<Player, ItemStack[]>();
     private Plugin plugin = Main.getPlugin(Main.class);
-    private Fight fightClass = new Fight();
 
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof Player) {
             Player player = (Player) event.getEntity();
             if (event.getCause().equals(EntityDamageEvent.DamageCause.FALL)) {
-                if (Methods.withSlimeBoots(player)) {
+                if (withSlimeBoots(player)) {
                     int distance = (int) player.getFallDistance() + 1;
-                    player.setVelocity(Methods.initialvelocity(distance));
+                    player.setVelocity(initialvelocity(distance));
                     event.setCancelled(true);
                 } else if (player.getInventory().getBoots().equals(AetherArmor.boots())) {
                     event.setCancelled(true);
                 }
             }
-            if (Methods.withAetherSet(player)) {
+            if (withAetherSet(player)) {
                 event.setDamage(event.getDamage() * 0.1);
             }
         }
@@ -99,7 +94,7 @@ public class Reg implements Listener {
     public void onFishingRodUse(PlayerFishEvent event) {
         Player player = event.getPlayer();
         if (player.getInventory().getItemInMainHand().equals(Items.grapple())) {
-            Methods.setVelocity(player, player, 2);
+            setVelocity(player, player, 2);
         }
     }
 
@@ -111,12 +106,12 @@ public class Reg implements Listener {
             String handName = item.getItemMeta().getDisplayName();
             Collection<ItemStack> items = event.getBlock().getDrops(player.getInventory().getItemInMainHand());
             try {
-                Location location = Methods.getLocofNearestBlock(player.getLocation(), Material.CHEST, 50);
+                Location location = getLocofNearestBlock(player.getLocation(), Material.CHEST, 50);
                 if (location != null) {
                     if (handName.equals(ChatColor.DARK_GRAY + "Ender Pickaxe") || handName.equals(ChatColor.DARK_GRAY + "Ender Axe") || handName.equals(ChatColor.DARK_GRAY + "Ender Shovel")) {
                         Chest chest = (Chest) player.getLocation().getWorld().getBlockAt(location).getState();
                         ArrayList<ItemStack> theitems = new ArrayList<>(items);
-                        if (Methods.hasAvaliableSlot(chest.getBlockInventory())) {
+                        if (hasAvaliableSlot(chest.getBlockInventory())) {
                             for (ItemStack itemStack : theitems) {
                                 chest.getBlockInventory().addItem(itemStack);
                             }
@@ -130,7 +125,7 @@ public class Reg implements Listener {
                         Chest chest = (Chest) player.getLocation().getWorld().getBlockAt(location).getState();
                         ArrayList<ItemStack> theitems = new ArrayList<>(items);
                         int random = (int) (Math.random() * 100);
-                        if (Methods.hasAvaliableSlot(chest.getBlockInventory())) {
+                        if (hasAvaliableSlot(chest.getBlockInventory())) {
                             if (random <= 95) {
                                 for (ItemStack itemStack : theitems) {
                                     chest.getBlockInventory().addItem(itemStack);
@@ -182,7 +177,7 @@ public class Reg implements Listener {
         for (Player player : world.getPlayers()) {
             if (entity instanceof Slime && !(entity instanceof MagmaCube)) {
                 if (drops != null) {
-                    if (Methods.randomChance(1, 100)) {
+                    if (randomChance(1, 100)) {
                         drops.clear();
                         entity.getLocation().getWorld().dropItem(entity.getLocation(), Items.slimecore());
                     }
@@ -216,7 +211,7 @@ public class Reg implements Listener {
                     }
                 }
             } else if (entity instanceof Enderman) {
-                if (Methods.randomChance(1, 1000)) {
+                if (randomChance(1, 1000)) {
                     drops.clear();
                     entity.getLocation().getWorld().dropItem(entity.getLocation(), Items.spawndrag());
                 }
@@ -244,7 +239,7 @@ public class Reg implements Listener {
         Player player = event.getPlayer();
         if (event.isSneaking()) {
             if (player.getInventory().getChestplate().equals(AetherArmor.elytra())) {
-                Methods.setVelocity(player, 2);
+                setVelocity(player, 2);
             }
         }
     }
@@ -282,6 +277,25 @@ public class Reg implements Listener {
             Player player = (Player) attacker;
             if (player.getInventory().getItemInMainHand().equals(AetherArmor.sword())) {
                 event.setDamage(5000);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent event) {
+        Player player = event.getPlayer();
+        String message = event.getMessage();
+        Commands commands = new Commands();
+        if (player.hasPermission("perm")) {
+            if (commands.specialChat.containsKey(player)) {
+                if (commands.specialChat.get(player)) {
+                    for (Player player1 : Bukkit.getOnlinePlayers()) {
+                        player1.sendMessage("");
+                        event.setMessage(ChatColor.LIGHT_PURPLE + message + "\n\n ");
+                    }
+                }
+            } else {
+                commands.specialChat.put(player, false);
             }
         }
     }
