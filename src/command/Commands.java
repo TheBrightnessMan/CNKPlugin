@@ -3,6 +3,7 @@ package command;
 import armorsets.AetherArmor;
 import armorsets.DiscoArmor;
 import items.Items;
+import me.Bright.Util.main.Methods;
 import me.Bright.main.Main;
 import me.Bright.main.Methods;
 import org.bukkit.Bukkit;
@@ -66,7 +67,7 @@ public class Commands implements CommandExecutor {
                         try {
                             Player target = Bukkit.getPlayer(args[0]);
                             double factor = Double.parseDouble(args[1]);
-                            Methods.setVelocity(player, target, factor);
+                            setVelocity(player, target, factor);
                         } catch (NumberFormatException e) {
                         }
                     }
